@@ -114,7 +114,7 @@ class ServerThread extends Thread{
 
 
                 }else if(s.startsWith("register:")){
-                    name=s.substring(s.indexOf(":")+1, s.indexOf("#"));
+                    name= s.substring(s.indexOf(":")+1, s.indexOf("#"));
                     pw=s.substring(s.indexOf("#")+1);
                     try {
                         int result=stmt.executeUpdate("insert into user(name,pw) values('"+name+"' ,'"+pw+"')");
@@ -146,7 +146,6 @@ class ServerThread extends Thread{
                         peopleList.get(dm_person).out.writeUTF(receive_side_message);
                     }
                     System.out.println("chat_type:"+chat_type);
-
                 }
             }
             catch(IOException ee){

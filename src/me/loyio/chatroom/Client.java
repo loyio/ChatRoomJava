@@ -93,6 +93,8 @@ public class Client extends JFrame implements Runnable,ActionListener {
             }
         });
 
+        chatUsers.setListData(new String[]{" "});
+
         chatUsersJsp = new JScrollPane(chatUsers);
         inputName=new TextField(6);
         inputPw=new TextField(6);
