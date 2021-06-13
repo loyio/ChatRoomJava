@@ -21,12 +21,14 @@ public class Server{
         Map<String,ServerThread> peopleList=null;
         peopleList=new HashMap<String, ServerThread>();
         while(true){
-            try  {  server=new ServerSocket(4331);
+            try  {
+                server=new ServerSocket(4331);
             }
             catch(IOException e1){
                 System.out.println("正在监听");
             }
-            try  {  you=server.accept();
+            try  {
+                you=server.accept();
                 InetAddress address=you.getInetAddress();
                 System.out.println("客户的IP:"+address);
             }
@@ -35,7 +37,7 @@ public class Server{
                 ServerThread peopleThread=new ServerThread(you,peopleList);
                 peopleThread.start();
             }
-            else  continue;
+            else continue;
         }
     }
 }
@@ -77,24 +79,29 @@ class ServerThread extends Thread{
         Boolean success=false;
         while(true){
             String s,pw=null;
-            try{  s=in.readUTF();
+            try{
+                s=in.readUTF();
                 if(s.startsWith("姓名:")){
                     name=s.substring(s.indexOf(":")+1, s.indexOf("#"));
                     pw=s.substring(s.indexOf("#")+1);
                     try {
                         rs=stmt.executeQuery("select * from user where name='"+name+"' and pw='"+pw+"'");
                         boolean boo=peopleList.containsKey(name);
-                        if(boo!=false)
-                        {out.writeUTF("用户已登录！");
-                            System.out.println("用户已登录！");}
-                        else if(rs.next()){
+                        if(boo!=false) {
+                            out.writeUTF("用户已登录！");
+                            System.out.println("用户已登录！");
+                        }else if(rs.next()){
                             System.out.println("登陆");
                             success=true;
                             peopleList.put(name,this);
                             Collection<ServerThread> values=peopleList.values();
                             Iterator<ServerThread> chatPersonList=values.iterator();
-                            while(chatPersonList.hasNext())
-                                ((ServerThread)chatPersonList.next()).out.writeUTF ("欢迎"+name+"上线");
+
+                            while(chatPersonList.hasNext()) {
+                                ServerThread chatPerson = (ServerThread)chatPersonList.next();
+                                chatPerson.out.writeUTF("欢迎" + name + "上线");
+                                chatPerson.out.writeUTF("user_online:" + this.peopleList.toString());
+                            }
                         }
                         else{
                             out.writeUTF("用户名或密码不对，请重新登录");
