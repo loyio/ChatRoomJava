@@ -51,7 +51,8 @@ class ServerThread extends Thread{
     ServerThread(Socket t, Map<String,ServerThread> list){
         peopleList=list;
         socket=t;
-        try {  in=new DataInputStream(socket.getInputStream());
+        try {
+            in=new DataInputStream(socket.getInputStream());
             out=new DataOutputStream(socket.getOutputStream());
         }
         catch (IOException e) {}
@@ -81,7 +82,7 @@ class ServerThread extends Thread{
             String s,pw=null;
             try{
                 s=in.readUTF();
-                if(s.startsWith("姓名:")){
+                if(s.startsWith("name:")){
                     name=s.substring(s.indexOf(":")+1, s.indexOf("#"));
                     pw=s.substring(s.indexOf("#")+1);
                     try {
@@ -112,7 +113,7 @@ class ServerThread extends Thread{
                     }
 
 
-                }else if(s.startsWith("注册:")){
+                }else if(s.startsWith("register:")){
                     name=s.substring(s.indexOf(":")+1, s.indexOf("#"));
                     pw=s.substring(s.indexOf("#")+1);
                     try {
@@ -126,13 +127,26 @@ class ServerThread extends Thread{
 
 
                 }
-                else if(s.startsWith("聊天内容")&& success){
-                    String message=s.substring(s.indexOf(":")+1);
-                    Collection<ServerThread> values=peopleList.values();
-                    Iterator<ServerThread> chatPersonList=values.iterator();
-                    while(chatPersonList.hasNext()){
-                        ((ServerThread)chatPersonList.next()).out.writeUTF (message);
+                else if(s.startsWith("chat")&& success){
+                    System.out.println("测试聊天内容:"+s);
+                    String chat_type = s.substring(s.indexOf("%")+1, s.indexOf("%")+3);
+                    if (chat_type.equals("bc")){
+                        String message_raw=s.substring(s.indexOf("#")+1);
+                        Collection<ServerThread> values=peopleList.values();
+                        Iterator<ServerThread> chatPersonList=values.iterator();
+                        while(chatPersonList.hasNext()){
+                            ((ServerThread)chatPersonList.next()).out.writeUTF (message_raw);
+                        }
+                    }else{
+                        String send_person = s.substring(s.indexOf("#")+1, s.indexOf(":"));
+                        String dm_person = s.substring(s.indexOf("@")+1, s.indexOf("#"));
+                        String send_side_message = "您私聊"+dm_person+":"+ s.substring(s.indexOf(":")+1);
+                        String receive_side_message = send_person+"私聊"+"您:"+ s.substring(s.indexOf(":")+1);
+                        peopleList.get(send_person).out.writeUTF(send_side_message);
+                        peopleList.get(dm_person).out.writeUTF(receive_side_message);
                     }
+                    System.out.println("chat_type:"+chat_type);
+
                 }
             }
             catch(IOException ee){

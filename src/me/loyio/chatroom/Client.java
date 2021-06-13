@@ -20,7 +20,7 @@ public class Client extends JFrame implements Runnable,ActionListener {
     Box baseBox;
     Button reg,login,send;
     TextField inputName,inputPw,inputIp,inputContent;
-    JTextArea chatResult;
+    JTextArea chatResult, atWho;
     JScrollPane chatResultjs;
     JList chatUsers;
     JScrollPane chatUsersJsp;
@@ -81,6 +81,17 @@ public class Client extends JFrame implements Runnable,ActionListener {
 
         });
         chatUsers.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        chatUsers.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (chatUsers.getSelectedValue() != null){
+                    System.out.println(chatUsers.getSelectedValue().toString());
+                    atWho.setText("@"+chatUsers.getSelectedValue().toString());
+                }else{
+                    atWho.setText("@所有人");
+                }
+            }
+        });
 
         chatUsersJsp = new JScrollPane(chatUsers);
         inputName=new TextField(6);
@@ -107,7 +118,10 @@ public class Client extends JFrame implements Runnable,ActionListener {
         pNorth.add(inputIp);
         pNorth.add(login);
         pNorth.add(reg);
-        pSouth.add(new Label("输入聊天内容:"));
+        pSouth.add(new Label("输入聊天内容: "));
+        atWho = new JTextArea();
+        atWho.setText("@所有人");
+        pSouth.add(atWho);
         pSouth.add(inputContent);
         pSouth.add(send);
         send.addActionListener(this);
@@ -139,7 +153,7 @@ public class Client extends JFrame implements Runnable,ActionListener {
                     in=new DataInputStream(socket.getInputStream());
                     out=new DataOutputStream(socket.getOutputStream());
                 }
-                out.writeUTF("姓名:"+name+"#"+inputPw.getText());
+                out.writeUTF("name:"+name+"#"+inputPw.getText());
             } catch(IOException exp){}
         }else if(e.getSource()==reg){
             name=inputName.getText();
@@ -150,13 +164,22 @@ public class Client extends JFrame implements Runnable,ActionListener {
                     in=new DataInputStream(socket.getInputStream());
                     out=new DataOutputStream(socket.getOutputStream());
                 }
-                out.writeUTF("注册:"+name+"#"+inputPw.getText());
+                out.writeUTF("register:"+name+"#"+inputPw.getText());
             }catch(IOException exp){}
         }else if(e.getSource()==send || e.getSource()==inputContent) {
             String s=inputContent.getText();
+            String send_message = "chat%";
+            if (chatUsers.getSelectedValue() != null){
+                send_message += "dm@";
+                send_message += chatUsers.getSelectedValue() + "#";
+            }else {
+                send_message += "bc#";
+            }
+            send_message = send_message+name +":" + s;
+            System.out.println(send_message);
             if(s!=null) {
                 try {
-                    out.writeUTF("聊天内容:"+name+":"+s);
+                    out.writeUTF(send_message);
                 }catch(IOException e1){
                     System.out.println(e1);
                 }
